@@ -1,0 +1,469 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>Unagi Search Engine</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<style>
+    .hero-area {
+        background-color: rgba(255, 228, 196, 0);
+        padding-top: 250px;
+        padding-bottom: 150px;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+        z-index: 1;
+    }
+
+
+    .hero-caption h2 {
+        font-size: 42px;
+        font-weight: 700;
+        color: black;
+        margin-top: 20px;
+    }
+
+    .hero-caption p {
+        font-size: medium;
+        font-weight: 500;
+        color: rgb(77, 77, 77);
+        margin-bottom: 30px;
+    }
+
+    .h-search-form {
+        width: 100%;
+        position: relative;
+    }
+
+    .h-search-form input {
+        width: 100%;
+        padding: 0 30px;
+        border-radius: 50px;
+        border-color: rgb(48, 48, 223);
+        font-weight: 600;
+        font-size: 16px;
+        position: relative;
+        color: #333;
+        height: 70px;
+    }
+
+    .h-search-form button {
+        font-size: large;
+        position: absolute;
+        right: 6px;
+        height: 60px;
+        border: none;
+        color: #fff;
+        background-color: rgb(48, 48, 223);
+        top: 5px;
+        border-radius: 50px;
+        width: 100px;
+    }
+
+    .h-search-form button:hover {
+        background: rgb(147, 147, 240);
+    }
+
+    #resultContainer {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .card {
+        height: 210px;
+    width: 100%;
+    margin: 20px;
+    margin-right: 100px;
+    margin-left: 100px;
+    border-radius: 50px;
+    display: flex;
+    flex-direction: column; 
+    justify-content: flex-start; 
+    align-items: flex-start; 
+    background-color: rgb(206, 206, 251);
+    font-weight: 600;
+    text-align: left;
+    padding: 20px; 
+    }
+
+    .card:hover {
+        background-color: rgb(226, 226, 255);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+    }
+
+    .card-actions {
+        margin: 8px;
+        padding: 16px 0;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        font-size: large;
+        text-align: center;
+    }
+
+    #loader {
+        display: none;
+    }
+
+    .skeleton-card {
+        height: 210px;
+        width: 100%;
+        margin: 20px;
+        margin-right: 100px;
+        margin-left: 100px;
+        border-radius: 50px;
+        position: relative;
+        background-color: #eaeaea;
+    }
+
+    .skeleton-card::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        transform: translateX(-100%);
+        background-image: linear-gradient(90deg, rgba(255, 255, 255, 0) 0, rgba(255, 255, 255, 0.2) 20%, rgba(255, 255, 255, 0.5) 60%, rgba(255, 255, 255, 0));
+        animation: load 1s infinite;
+    }
+
+    #xyz {
+        margin-top: 150px;
+        text-align: center;
+        font-size: 20px;
+        color: #828282;
+        font-weight: 600;
+    }
+
+    #aaa {
+        margin-left: 45px;
+        margin-top: 25px;
+        font-weight: 600;
+        font-size: 16px;
+        position: relative;
+        color: #828282;
+    }
+
+    @keyframes load {
+        100% {
+            transform: translateX(100%);
+        }
+    }
+
+    @media screen and (prefers-reduced-motion: reduce) {
+        .skeleton-card::after {
+            animation: none;
+        }
+    }
+
+    #back-to-top-button {
+        font-size: large;
+        position: absolute;
+        right: 6px;
+        height: 60px;
+        border: none;
+        color: #fff;
+        background-color: rgb(113, 113, 113);
+        border-radius: 50px;
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        display: none;
+    }
+
+    #back-to-top-button:hover {
+        background: rgb(242, 242, 242);
+    }
+</style>
+
+<body>
+    <section class="hero-area">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <div class="hero-caption">
+                        <h2>Unagi Search</h2>
+                        <p>CIS5550 Final Project</p>
+                        <div class="h-search-form">
+                            <form id="search-form">
+                                <input id="search-input" type="search" name="search"
+                                    placeholder="Type Your Keyboard..." onkeyup="updateSuggestions()">
+                                <button type="submit">Search</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="aaa">
+            
+        </div>
+
+        <div id="xyz">
+
+        </div>
+
+        <div id="resultContainer">
+        </div>
+        <div id="loader">
+            <div class="skeleton-card"></div>
+        </div>
+
+        <div class="card-actions" id="actions">
+            <span>
+                Showing
+                <span id="resultCountElm"></span> of
+                <span id="resultTotalElm"></span> results
+            </span>
+        </div>
+        <button id="back-to-top-button">Back to Top</button>
+
+    </section>
+    <script>
+        let cardIncrease = 3;
+        let pageCount = 0;
+        let resultCount = 0;
+        let currentpage = 1;
+        const resultContainer = document.getElementById("resultContainer");
+        const resultCountElem = document.getElementById("resultCountElm");
+        const resultTotalElem = document.getElementById("resultTotalElm");
+        const loader = document.getElementById("loader");
+        let websites = null;
+        let frontendIpandPort = "INSERT_IP_PORT_HERE";
+
+        function sanitizeInput(input) {
+            const pattern = /[`!@#$%^&*()_+\-=[\]{};':"\\|,.<>?~]/g;
+            return input.replace(pattern, '');
+        }
+
+        function updateSuggestions() {
+
+            console.log("start");
+            const pattern = /^\s*$/;
+            var searchTerms = document.getElementById("search-input").value;
+            whitespace = pattern.test(searchTerms);
+            if (searchTerms == "" || whitespace) {
+                return;
+            }
+            request = new XMLHttpRequest();
+            request.open("GET", "https://unagi.cis5550.net" + "/findwords/" + encodeURIComponent(searchTerms));
+            request.overrideMimeType('application/xml');
+            request.onreadystatechange = function() {
+                
+                if ((request.readyState == 4) && (request.status == 200)) {
+                    if (request.responseText === "BAD") {
+                        document.open();
+                        document.write("<html><body><h1>You are not welcome!</h1></body></html>\r\n");
+                        document.close();
+                    }
+                    const xmlData = request.responseXML;
+                    if (xmlData != null){
+                        var parser = new DOMParser();
+                        var xmldoc = parser.parseFromString(request.responseText, "application/xml");
+                        console.log(request.responseText);
+                        var root = xmldoc.getElementsByTagName('root').item(0);
+                        var words = root.getElementsByTagName('words');
+                        var htmlOut = "";
+                        for (var i =0; i < words.length; i++) {
+                            htmlOut += words.item(i).textContent + "<br>";
+                        }
+                        document.getElementById('aaa').innerHTML = htmlOut;
+                    }
+                    
+                }
+            }
+            request.send();
+        }
+
+        const createCard = (index) => {
+            const card = document.createElement("div");
+            card.className = "card";
+            card.style.display = "flex";
+            card.style.flexDirection = "column";
+            card.style.padding = "20px";
+            card.style.textAlign = "left";
+
+            let title = document.createElement("p");
+            title.style.fontSize = "26px";
+            title.style.textAlign = "left";
+            title.style.overflowWrap = "break-word";
+            title.style.wordBreak = "break-word";
+            title.style.overflowY = "auto";
+            title.textContent = websites[index - 1].getElementsByTagName("title")[0].textContent;
+
+            let score = document.createElement("p");
+            score.style.fontSize = "20px";
+            score.style.textAlign = "left";
+            score.style.overflowWrap = "break-word";
+            score.style.wordBreak = "break-word";
+            score.style.overflowY = "auto";
+            score.textContent = "Score: " + websites[index - 1].getElementsByTagName("score")[0].textContent;
+
+            let content = document.createElement("p");
+            content.style.fontSize = "20px";
+            content.style.textAlign = "left";
+            content.style.overflowWrap = "break-word";
+            content.style.wordBreak = "break-word";
+            content.style.overflowY = "auto";
+            content.textContent = "Content: " + websites[index - 1].getElementsByTagName("content")[0].textContent;
+
+            card.appendChild(title);
+            card.appendChild(score);
+            card.appendChild(content);
+
+            card.addEventListener('click', function () {
+                window.open(websites[index - 1].getElementsByTagName("url")[0].textContent, '_blank');
+            });
+
+            resultContainer.appendChild(card);
+        };
+
+        const displayResult = (pageIndex) => {
+            currentPage = pageIndex;
+
+            const startRange = (pageIndex - 1) * cardIncrease;
+            const endRange =
+                currentPage == pageCount ? resultCount : pageIndex * cardIncrease;
+
+            resultCountElem.innerHTML = endRange;
+
+            for (let i = startRange + 1; i <= endRange; i++) {
+                createCard(i);
+            }
+        };
+
+        const handleInfiniteScroll = () => {
+
+            const endOfPage =
+                window.innerHeight + window.pageYOffset >= document.body.offsetHeight;
+
+            if (endOfPage) {
+                displayResult(currentPage + 1);
+            }
+
+            if (currentPage === pageCount) {
+                removeInfiniteScroll();
+            }
+
+        };
+
+        const removeInfiniteScroll = () => {
+            //loader.remove();
+            loader.style.display = "none";
+            window.removeEventListener("scroll", handleInfiniteScroll);
+        };
+
+
+        window.addEventListener("scroll", handleInfiniteScroll);
+
+        /* Back to top button*/
+        const backToTopButton = document.querySelector('#back-to-top-button');
+
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 0) {
+                backToTopButton.style.display = 'block';
+            } else {
+                backToTopButton.style.display = 'none';
+            }
+        });
+
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+
+            document.getElementById("search-form").addEventListener("submit", function (event) {
+
+                //when submit is clicked.
+                event.preventDefault();
+                document.getElementById('xyz').innerHTML ="";
+                window.addEventListener("scroll", handleInfiniteScroll);
+                //document.getElementsByClassName("card-actions").style.display = 'none';
+                document.getElementById("resultContainer").innerHTML = "";
+                var searchTerms = sanitizeInput(document.getElementById("search-input").value);
+                
+
+                const pattern = /^\s*$/;
+                whitespace = pattern.test(searchTerms);
+                if (searchTerms == "" || whitespace) {
+                    window.location.reload();
+                }
+
+                var request = null;
+                try { request = new XMLHttpRequest(); }
+                catch (err1) {
+                    try { request = new ActiveXObject("Microsoft.XMLHTTP"); }
+                    catch (err2) {
+                        try { request = new ActiveXObject("Msxml2.XMLHTTP"); }
+                        catch (err3) { request = null; }
+                    }
+                }
+                if (request == null) alert("Error creating request object!");
+                
+                request.open("GET", "https://unagi.cis5550.net" + "/search/" + encodeURIComponent(searchTerms));
+                request.overrideMimeType('application/xml');
+                request.onreadystatechange = function () {
+                    //call back
+                    if ((request.readyState == 4) && (request.status == 200)) {
+                        if (request.responseText === "BAD") {
+                            document.open();
+                            document.write("<html><body><h1>You are not welcome!</h1></body></html>\r\n");
+                            document.close();
+                        }
+                        console.log('Ready state:', request.readyState, 'Status:', request.status);
+                        const xmlData = request.responseXML;
+                        const searching = "We are searching: " + searchTerms;
+                        console.log(request.responseText);
+                        if (xmlData != null) {
+                            
+                            var parser = new DOMParser();
+                            var xmldoc = parser.parseFromString(request.responseText, "application/xml");
+                            //var xmldoc = request.responseXML;
+                            console.log(request.responseText);
+
+                            var root = xmldoc.getElementsByTagName('root').item(0);
+                            websites = root.getElementsByTagName('website');
+                            console.log(websites.length);
+                            if (websites.length == 0) {
+                                document.getElementById('xyz').innerHTML = searching + "<br> No Result is Found.";
+                                document.getElementById("actions").style.display = "none";
+                                removeInfiniteScroll();
+                                return;
+                            }
+                            document.getElementById("loader").style.display = "flex";
+                            document.getElementById("actions").style.display = "flex";
+                            resultCount = websites.length;
+                            resultTotalElem.innerHTML = resultCount;
+                            pageCount = Math.ceil(resultCount / cardIncrease);
+                            let currentPage = 1;
+                            displayResult(currentPage);
+                            document.getElementById('xyz').innerHTML = searching;
+                        } else {
+                            document.getElementById('xyz').innerHTML = searching + "<br> No Result is Found.";
+                            document.getElementById("actions").style.display = "none";
+                            removeInfiniteScroll();
+                            return;
+                        }
+                    } else if ((request.readyState == 4) && (request.status != 200)) {
+                        //status not equal to 200
+                        document.getElementById('xyz').innerHTML = "Server Failed."
+                    }
+                }
+                request.send();
+                
+            })
+        })
+    </script>
+
+</body>
+
+</html>
